@@ -1,0 +1,291 @@
+This is an annotated excerpt from my command line history from the
+example portion of the talk. I've trimmed out just a few extraneous
+or erroneous commands.
+
+To see just the command histtory without annotation, try:
+
+    $ egrep "^  4" history.log
+
+Prepare the repository
+
+  409  mkdir starnix
+  410  cd starnix/
+  412  ls -la
+  413  pwd
+  414  git init
+
+Show what git init did
+
+  416  ls -la
+  417  cd .git
+  418  ls
+  419  cd ..
+
+Nothing up my sleeve
+
+  420  ls -l
+  421  git status
+
+Start working on a new file
+
+  422  echo "Hello world" > README
+  423  ls
+
+It is initially untracked
+
+  424  git status
+
+Stage the file
+
+  425  git add README
+
+Show that it is now staged
+
+  426  git status
+
+Make the first commit
+
+  427  git commit -m "Seed repo"
+
+Show that the file has not changed, but the status is now clean
+
+  428  ls -l
+  429  git status
+
+Make some changes
+
+  430  vim README
+
+The status is modified, and the diff is relative to the first commit
+
+  432  git status
+  433  git diff
+
+Stage all the changes for this file
+
+  434  git add README
+
+Show they are staged
+
+  435  git status
+
+Edit a second new file
+
+  436  vim information
+
+There are two files now, one of them with staged modifications, the
+other untracked
+
+  437  ls -l
+  438  git status
+
+Stage the new file, and show that it is staged
+
+  439  git add information
+  440  git status
+
+See what changes are staged (like "diff <HEAD> <index>")
+
+  441  git diff --cached
+
+See what changes are not staged (like "diff <index> <work tree>")
+
+  442  git diff
+
+Show that there are staged changes, no unstaged modifications
+
+  443  git status
+
+Make a second commit with the staged changes
+
+  444  git commit -m "All work and no play"
+
+Show that we are now clean
+
+  445  git status
+
+...with no unstaged changes
+
+  446  git diff
+
+...and no staged changes
+
+  447  git diff --cached
+
+Show a summary of the commits reachable from this branch ('master')
+
+  448  git log
+
+Show the commits reachable from this branch with their embedded patches
+
+  449  git log -p
+
+Make a new branch here (i.e. where 'master' is)
+  
+  451  git branch topicA
+
+Show all local branches
+
+  452  git branch
+
+Show all local branches with the abbreviated commit ID and short commit
+message of the associated commit
+
+  453  git branch -v
+
+Do some work on a file
+
+  455  vim README
+
+Show the work we did on the file
+
+  456  git diff
+
+Show that there are unstaged changes
+
+  457  git status
+
+Stage all changes to the file
+
+  458  git add README
+
+Commit the staged changes (note: we never did a checkout to the new
+branch, so this commit is appended on 'master')
+
+  459  git commit -m "An idle comment"
+
+Show that 'master' now refers to the new commit, and is different than
+'topicA'
+
+  460  git branch -v
+
+Launch the graphical repository browser in the background ("&") and
+populate the view with the commits reachable from any reference
+("--all"). That is, reachable from any local branch, remote branch, or
+tag.
+
+  461  gitk --all &
+
+Make 'topicA' the active branch, updating the index and working tree
+to the snapshot represented by that commit
+
+  462  git checkout topicA
+
+Show that we are now on the 'topicA' branch, then do it again verbosely
+(showing ID and short message)
+
+  463  git branch
+  464  git branch -v
+
+Demonstrate the all ('-a' = local and remote) and remote-only ('-r')
+switches
+
+  465  git branch -a
+  466  git branch -r
+
+Show that the file looks the way it looked when we created the topicA
+branch
+
+  467  cat README
+
+Show that the work tree is clean
+
+  468  git status
+
+Do some work on the file
+
+  469  vim README
+
+Show that there are unstaged changes
+
+  470  git status
+
+Stage all the changes to this file
+
+  471  git add README
+
+Commit the staged changes (note: this commit is appended on 'topicA')
+
+  472  git commit -m "What do you think of topicA?"
+
+Make 'master' the active branch, updating the index and working tree as
+necessary
+
+  473  git checkout master
+
+Merge the work contained in 'topicA' into here (i.e. 'master')
+
+  474  git merge topicA
+
+Show that the tree is clean
+
+  475  git status
+
+Also show in gitk that 'topicA' has not changed
+
+Show that all the commits in 'topicA' are now reachable from 'master',
+and that there is a new merge commit with two parents
+
+  476  git log
+
+Show that the file contains the changes originally performed in each of
+'master' and 'topicA'
+
+  477  cat README
+
+Show that we are still checked out on 'master'
+
+  478  git branch
+
+Realizing the error of our ways, we wish to forcibly return the
+'master' branch to where it was just before the merge. We try
+progressively longer ID prefixes until finding one that is long
+enough to be unambiguous within this repository.
+
+  479  git reset --hard 5
+  480  git reset --hard 5e
+  481  git reset --hard 5e6
+  482  git reset --hard 5e63
+
+It's now (almost) as if command 474 had never happened (except for an
+abandoned-but-recoverable merge commit in the object store that git
+will eventually garbage collect).
+
+Make 'topicA' the active branch, updating the index and working tree as
+necessary
+
+  483  git checkout topicA
+
+Rebase the contents of this branch ('topicA') onto 'master'. That is,
+perform a batch cherrypick of all commits reachable from 'topicA' that
+are *not* reachable from 'master' (i.e. up to but not including the
+latest common-ancestor), append them on 'master' and then hard reset
+'topicA' to the last commit.
+
+  484  git rebase master
+
+Show that we are still on 'topicA'
+
+  485  git branch
+
+Also show in gitk that the commit formerly outside of 'master' has been
+duplicated, and is now descended from 'master'.
+
+Switch back and forth between the branches, showing status. I was
+trying to show a cue that 'master' can now be fast-forwarded to
+'topicA' but it turned out that the cue is absent in this case. I think
+there is a note in the output of "git remote show <remotename>", when
+applicable.
+
+  486  git checkout master
+  487  git status
+  488  git checkout topicA
+  489  git status
+  490  git checkout master
+
+Repeat the merge from command 474, but this time it is a fast-forward
+merge, because 'topicA' is a descendent of this branch ('master').
+If you aren't sure that a fast-forward is possible, and want the merge
+to fail if it isn't, use "git merge --ff-only <otherbranch>".
+
+  491  git merge topicA
